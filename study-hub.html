@@ -1,0 +1,1804 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>StudyHub | منصة الدراسة الذكية</title>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;900&family=Tajawal:wght@300;400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --green-dark: #0d3320;
+    --green-deep: #134d2e;
+    --green-mid: #1a6b3c;
+    --green-bright: #22c55e;
+    --green-light: #4ade80;
+    --green-pale: #bbf7d0;
+    --green-glow: #86efac;
+    --gold: #fbbf24;
+    --gold-light: #fde68a;
+    --cream: #fefce8;
+    --white: #ffffff;
+    --text-main: #f0fdf4;
+    --text-muted: #86efac;
+    --card-bg: rgba(255,255,255,0.05);
+    --card-border: rgba(74,222,128,0.2);
+    --shadow-green: 0 0 30px rgba(34,197,94,0.15);
+    --radius: 16px;
+    --radius-lg: 24px;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Cairo', sans-serif;
+    background: var(--green-dark);
+    color: var(--text-main);
+    min-height: 100vh;
+    overflow-x: hidden;
+    position: relative;
+  }
+
+  /* === BOARD TEXTURE BACKGROUND === */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background:
+      repeating-linear-gradient(
+        0deg,
+        transparent,
+        transparent 38px,
+        rgba(255,255,255,0.025) 38px,
+        rgba(255,255,255,0.025) 40px
+      ),
+      repeating-linear-gradient(
+        90deg,
+        transparent,
+        transparent 38px,
+        rgba(255,255,255,0.015) 38px,
+        rgba(255,255,255,0.015) 40px
+      ),
+      radial-gradient(ellipse at 20% 20%, rgba(26,107,60,0.4) 0%, transparent 60%),
+      radial-gradient(ellipse at 80% 80%, rgba(13,51,32,0.6) 0%, transparent 60%),
+      linear-gradient(145deg, #0d3320 0%, #134d2e 40%, #0f4427 70%, #0d3320 100%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='400'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='400' height='400' filter='url(%23n)' opacity='0.025'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 0;
+    opacity: 0.4;
+  }
+
+  /* === CHALK DUST PARTICLES === */
+  .particles {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 1;
+    overflow: hidden;
+  }
+
+  .particle {
+    position: absolute;
+    background: rgba(255,255,255,0.4);
+    border-radius: 50%;
+    animation: drift linear infinite;
+  }
+
+  @keyframes drift {
+    0% { transform: translateY(100vh) rotate(0deg); opacity: 0; }
+    10% { opacity: 1; }
+    90% { opacity: 0.3; }
+    100% { transform: translateY(-20px) rotate(360deg); opacity: 0; }
+  }
+
+  /* === LAYOUT === */
+  .container {
+    position: relative;
+    z-index: 2;
+    max-width: 1300px;
+    margin: 0 auto;
+    padding: 0 20px;
+  }
+
+  /* === HEADER === */
+  header {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: rgba(13,51,32,0.85);
+    backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--card-border);
+    padding: 14px 0;
+  }
+
+  .header-inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+  }
+
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 1.5rem;
+    font-weight: 900;
+    color: var(--green-light);
+    letter-spacing: -0.5px;
+  }
+
+  .logo span {
+    background: linear-gradient(135deg, var(--green-light), var(--gold));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .logo-icon {
+    width: 42px;
+    height: 42px;
+    background: linear-gradient(135deg, var(--green-bright), var(--green-mid));
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.3rem;
+    box-shadow: 0 0 20px rgba(34,197,94,0.4);
+  }
+
+  nav {
+    display: flex;
+    gap: 6px;
+  }
+
+  .nav-btn {
+    padding: 8px 18px;
+    border: none;
+    border-radius: 10px;
+    background: transparent;
+    color: var(--text-muted);
+    font-family: 'Cairo', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s;
+    border: 1px solid transparent;
+  }
+
+  .nav-btn:hover, .nav-btn.active {
+    background: rgba(34,197,94,0.15);
+    border-color: var(--card-border);
+    color: var(--green-light);
+  }
+
+  /* === HERO === */
+  .hero {
+    padding: 60px 0 40px;
+    text-align: center;
+  }
+
+  .hero-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(34,197,94,0.1);
+    border: 1px solid var(--card-border);
+    border-radius: 50px;
+    padding: 6px 16px;
+    font-size: 0.85rem;
+    color: var(--green-glow);
+    margin-bottom: 20px;
+    animation: pulse-badge 3s ease-in-out infinite;
+  }
+
+  @keyframes pulse-badge {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(34,197,94,0.2); }
+    50% { box-shadow: 0 0 0 8px rgba(34,197,94,0); }
+  }
+
+  .hero h1 {
+    font-size: clamp(2rem, 5vw, 3.5rem);
+    font-weight: 900;
+    line-height: 1.2;
+    margin-bottom: 16px;
+  }
+
+  .hero h1 .highlight {
+    background: linear-gradient(135deg, var(--green-light) 0%, var(--gold) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .hero p {
+    color: var(--text-muted);
+    font-size: 1.1rem;
+    max-width: 500px;
+    margin: 0 auto;
+  }
+
+  /* === TABS === */
+  .tabs {
+    display: flex;
+    gap: 8px;
+    margin: 40px 0 30px;
+    background: rgba(0,0,0,0.2);
+    padding: 6px;
+    border-radius: var(--radius);
+    border: 1px solid var(--card-border);
+    overflow-x: auto;
+  }
+
+  .tab {
+    flex: 1;
+    min-width: 120px;
+    padding: 12px 20px;
+    border: none;
+    border-radius: 10px;
+    background: transparent;
+    color: var(--text-muted);
+    font-family: 'Cairo', sans-serif;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s;
+    white-space: nowrap;
+  }
+
+  .tab.active {
+    background: linear-gradient(135deg, var(--green-mid), var(--green-bright));
+    color: var(--white);
+    box-shadow: 0 4px 15px rgba(34,197,94,0.3);
+  }
+
+  .tab:not(.active):hover {
+    background: rgba(34,197,94,0.1);
+    color: var(--green-light);
+  }
+
+  /* === PANELS === */
+  .panel { display: none; }
+  .panel.active { display: block; animation: fadeUp 0.4s ease; }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(16px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* === CARDS === */
+  .card {
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: var(--radius-lg);
+    padding: 28px;
+    backdrop-filter: blur(10px);
+    box-shadow: var(--shadow-green);
+    transition: border-color 0.3s;
+  }
+
+  .card:hover {
+    border-color: rgba(74,222,128,0.4);
+  }
+
+  .card-title {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--green-light);
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  /* === Q&A GENERATOR === */
+  .qa-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+  }
+
+  @media (max-width: 768px) { .qa-grid { grid-template-columns: 1fr; } }
+
+  .input-area {
+    width: 100%;
+    min-height: 220px;
+    background: rgba(0,0,0,0.3);
+    border: 1px solid var(--card-border);
+    border-radius: var(--radius);
+    padding: 16px;
+    color: var(--text-main);
+    font-family: 'Cairo', sans-serif;
+    font-size: 0.95rem;
+    resize: vertical;
+    outline: none;
+    transition: border-color 0.3s;
+    line-height: 1.8;
+    direction: rtl;
+  }
+
+  .input-area:focus {
+    border-color: var(--green-bright);
+    box-shadow: 0 0 0 3px rgba(34,197,94,0.1);
+  }
+
+  .input-area::placeholder { color: rgba(134,239,172,0.4); }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 28px;
+    border: none;
+    border-radius: 12px;
+    font-family: 'Cairo', sans-serif;
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.3s;
+  }
+
+  .btn-primary {
+    background: linear-gradient(135deg, var(--green-bright), var(--green-mid));
+    color: white;
+    box-shadow: 0 4px 20px rgba(34,197,94,0.3);
+    width: 100%;
+    justify-content: center;
+    margin-top: 12px;
+  }
+
+  .btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 30px rgba(34,197,94,0.4);
+  }
+
+  .btn-gold {
+    background: linear-gradient(135deg, var(--gold), #f59e0b);
+    color: var(--green-dark);
+    box-shadow: 0 4px 20px rgba(251,191,36,0.3);
+  }
+
+  .btn-gold:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 30px rgba(251,191,36,0.4);
+  }
+
+  .btn-outline {
+    background: transparent;
+    color: var(--green-light);
+    border: 1px solid var(--card-border);
+  }
+
+  .btn-outline:hover {
+    background: rgba(34,197,94,0.1);
+    border-color: var(--green-bright);
+  }
+
+  .btn-sm {
+    padding: 8px 16px;
+    font-size: 0.85rem;
+    border-radius: 8px;
+  }
+
+  /* === Q&A CARDS === */
+  .qa-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    max-height: 380px;
+    overflow-y: auto;
+    padding-left: 4px;
+  }
+
+  .qa-list::-webkit-scrollbar { width: 4px; }
+  .qa-list::-webkit-scrollbar-track { background: rgba(0,0,0,0.2); border-radius: 4px; }
+  .qa-list::-webkit-scrollbar-thumb { background: var(--green-mid); border-radius: 4px; }
+
+  .qa-item {
+    background: rgba(0,0,0,0.25);
+    border: 1px solid rgba(74,222,128,0.15);
+    border-radius: var(--radius);
+    padding: 14px 18px;
+    cursor: pointer;
+    transition: all 0.3s;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .qa-item::before {
+    content: '';
+    position: absolute;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    width: 3px;
+    background: var(--green-bright);
+    border-radius: 0 4px 4px 0;
+  }
+
+  .qa-item:hover {
+    border-color: rgba(74,222,128,0.4);
+    transform: translateX(-2px);
+  }
+
+  .qa-item .q-text {
+    font-weight: 600;
+    font-size: 0.9rem;
+    color: var(--text-main);
+    margin-bottom: 4px;
+  }
+
+  .qa-item .a-text {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    display: none;
+    margin-top: 8px;
+    padding-top: 8px;
+    border-top: 1px solid var(--card-border);
+    line-height: 1.7;
+  }
+
+  .qa-item.revealed .a-text { display: block; animation: fadeUp 0.3s ease; }
+
+  .qa-item .reveal-hint {
+    font-size: 0.75rem;
+    color: rgba(134,239,172,0.5);
+    margin-top: 4px;
+  }
+
+  /* === QUIZ MODE === */
+  .quiz-card {
+    text-align: center;
+    max-width: 700px;
+    margin: 0 auto;
+  }
+
+  .quiz-progress {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 28px;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  .progress-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: rgba(74,222,128,0.2);
+    border: 1px solid var(--card-border);
+    transition: all 0.3s;
+  }
+
+  .progress-dot.done { background: var(--green-bright); }
+  .progress-dot.current { background: var(--gold); box-shadow: 0 0 8px rgba(251,191,36,0.5); }
+  .progress-dot.wrong { background: #ef4444; }
+
+  .question-number {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    margin-bottom: 12px;
+  }
+
+  .question-text {
+    font-size: 1.4rem;
+    font-weight: 700;
+    line-height: 1.5;
+    margin-bottom: 32px;
+    color: var(--text-main);
+    background: rgba(34,197,94,0.05);
+    border: 1px solid var(--card-border);
+    border-radius: var(--radius);
+    padding: 24px;
+  }
+
+  .answer-reveal {
+    background: rgba(34,197,94,0.08);
+    border: 1px solid rgba(74,222,128,0.3);
+    border-radius: var(--radius);
+    padding: 20px 24px;
+    margin-bottom: 24px;
+    display: none;
+    animation: fadeUp 0.3s ease;
+    text-align: right;
+    line-height: 1.8;
+    color: var(--green-pale);
+    font-size: 0.95rem;
+  }
+
+  .quiz-buttons {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  .btn-correct {
+    background: linear-gradient(135deg, var(--green-bright), var(--green-mid));
+    color: white;
+    border: none;
+    padding: 12px 28px;
+    border-radius: 12px;
+    font-family: 'Cairo', sans-serif;
+    font-size: 0.95rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.3s;
+    box-shadow: 0 4px 15px rgba(34,197,94,0.3);
+  }
+
+  .btn-wrong {
+    background: linear-gradient(135deg, #ef4444, #dc2626);
+    color: white;
+    border: none;
+    padding: 12px 28px;
+    border-radius: 12px;
+    font-family: 'Cairo', sans-serif;
+    font-size: 0.95rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.3s;
+    box-shadow: 0 4px 15px rgba(239,68,68,0.3);
+  }
+
+  .btn-correct:hover { transform: translateY(-2px); }
+  .btn-wrong:hover { transform: translateY(-2px); }
+
+  .quiz-result {
+    text-align: center;
+    padding: 40px 20px;
+  }
+
+  .result-score {
+    font-size: 5rem;
+    font-weight: 900;
+    background: linear-gradient(135deg, var(--green-light), var(--gold));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    line-height: 1;
+    margin-bottom: 8px;
+  }
+
+  .result-label {
+    font-size: 1.2rem;
+    color: var(--text-muted);
+    margin-bottom: 24px;
+  }
+
+  .stars {
+    font-size: 2.5rem;
+    margin-bottom: 24px;
+    animation: bounce-stars 0.5s ease;
+  }
+
+  @keyframes bounce-stars {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.2); }
+  }
+
+  .quiz-empty {
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--text-muted);
+  }
+
+  .quiz-empty .empty-icon { font-size: 3rem; margin-bottom: 16px; }
+
+  /* === POMODORO === */
+  .pomodoro-layout {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+    align-items: start;
+  }
+
+  @media (max-width: 768px) { .pomodoro-layout { grid-template-columns: 1fr; } }
+
+  .timer-display {
+    text-align: center;
+    padding: 40px 20px;
+  }
+
+  .timer-ring {
+    position: relative;
+    width: 200px;
+    height: 200px;
+    margin: 0 auto 28px;
+  }
+
+  .timer-svg {
+    width: 200px;
+    height: 200px;
+    transform: rotate(-90deg);
+  }
+
+  .timer-track {
+    fill: none;
+    stroke: rgba(74,222,128,0.1);
+    stroke-width: 8;
+  }
+
+  .timer-fill {
+    fill: none;
+    stroke: url(#timerGrad);
+    stroke-width: 8;
+    stroke-linecap: round;
+    stroke-dasharray: 565;
+    stroke-dashoffset: 0;
+    transition: stroke-dashoffset 1s linear;
+  }
+
+  .timer-text {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+  }
+
+  .timer-time {
+    font-size: 2.8rem;
+    font-weight: 900;
+    color: var(--text-main);
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .timer-mode-label {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    margin-top: 4px;
+  }
+
+  .timer-controls {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+  }
+
+  .timer-modes {
+    display: flex;
+    gap: 6px;
+    justify-content: center;
+    margin-bottom: 20px;
+  }
+
+  .mode-pill {
+    padding: 6px 14px;
+    border-radius: 50px;
+    font-family: 'Cairo', sans-serif;
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+    border: 1px solid var(--card-border);
+    background: transparent;
+    color: var(--text-muted);
+    transition: all 0.3s;
+  }
+
+  .mode-pill.active, .mode-pill:hover {
+    background: rgba(34,197,94,0.2);
+    border-color: var(--green-bright);
+    color: var(--green-light);
+  }
+
+  .pomodoro-stats {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-top: 20px;
+  }
+
+  .stat-box {
+    background: rgba(0,0,0,0.2);
+    border: 1px solid var(--card-border);
+    border-radius: 12px;
+    padding: 16px;
+    text-align: center;
+  }
+
+  .stat-box .val {
+    font-size: 2rem;
+    font-weight: 900;
+    color: var(--green-light);
+    line-height: 1;
+  }
+
+  .stat-box .lbl {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    margin-top: 4px;
+  }
+
+  /* === MUSIC PLAYER === */
+  .music-section {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .music-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: rgba(0,0,0,0.2);
+    border: 1px solid var(--card-border);
+    border-radius: 12px;
+    padding: 12px 16px;
+    cursor: pointer;
+    transition: all 0.3s;
+  }
+
+  .music-item:hover, .music-item.playing {
+    border-color: rgba(74,222,128,0.4);
+    background: rgba(34,197,94,0.05);
+  }
+
+  .music-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    background: linear-gradient(135deg, var(--green-mid), var(--green-bright));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.1rem;
+    flex-shrink: 0;
+  }
+
+  .music-info { flex: 1; }
+
+  .music-name {
+    font-weight: 600;
+    font-size: 0.9rem;
+  }
+
+  .music-type {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+  }
+
+  .music-toggle {
+    font-size: 1.2rem;
+    color: var(--green-light);
+  }
+
+  .equalizer {
+    display: flex;
+    gap: 2px;
+    align-items: flex-end;
+    height: 20px;
+  }
+
+  .eq-bar {
+    width: 3px;
+    background: var(--green-bright);
+    border-radius: 2px;
+    animation: eq 0.8s ease-in-out infinite alternate;
+  }
+
+  .eq-bar:nth-child(1) { animation-delay: 0s; }
+  .eq-bar:nth-child(2) { animation-delay: 0.15s; }
+  .eq-bar:nth-child(3) { animation-delay: 0.3s; }
+  .eq-bar:nth-child(4) { animation-delay: 0.45s; }
+
+  @keyframes eq {
+    from { height: 4px; }
+    to { height: 20px; }
+  }
+
+  /* === NOTES === */
+  .notes-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 16px;
+  }
+
+  .note-card {
+    background: rgba(0,0,0,0.25);
+    border: 1px solid var(--card-border);
+    border-radius: var(--radius);
+    padding: 18px;
+    position: relative;
+    transition: all 0.3s;
+    animation: fadeUp 0.3s ease;
+  }
+
+  .note-card:hover {
+    border-color: rgba(74,222,128,0.4);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+  }
+
+  .note-title {
+    font-weight: 700;
+    font-size: 0.95rem;
+    margin-bottom: 8px;
+    color: var(--green-light);
+  }
+
+  .note-body {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    line-height: 1.7;
+    word-break: break-word;
+  }
+
+  .note-date {
+    font-size: 0.7rem;
+    color: rgba(134,239,172,0.4);
+    margin-top: 12px;
+  }
+
+  .note-delete {
+    position: absolute;
+    top: 12px;
+    left: 12px;
+    background: rgba(239,68,68,0.15);
+    border: 1px solid rgba(239,68,68,0.3);
+    border-radius: 8px;
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 0.8rem;
+    color: #ef4444;
+    transition: all 0.3s;
+    opacity: 0;
+  }
+
+  .note-card:hover .note-delete { opacity: 1; }
+  .note-delete:hover { background: rgba(239,68,68,0.3); }
+
+  .note-form {
+    display: grid;
+    grid-template-columns: 1fr 2fr auto;
+    gap: 10px;
+    margin-bottom: 24px;
+    align-items: end;
+  }
+
+  @media (max-width: 600px) { .note-form { grid-template-columns: 1fr; } }
+
+  .input-field {
+    width: 100%;
+    background: rgba(0,0,0,0.3);
+    border: 1px solid var(--card-border);
+    border-radius: var(--radius);
+    padding: 12px 16px;
+    color: var(--text-main);
+    font-family: 'Cairo', sans-serif;
+    font-size: 0.95rem;
+    outline: none;
+    transition: border-color 0.3s;
+    direction: rtl;
+  }
+
+  .input-field:focus {
+    border-color: var(--green-bright);
+    box-shadow: 0 0 0 3px rgba(34,197,94,0.1);
+  }
+
+  .input-field::placeholder { color: rgba(134,239,172,0.4); }
+
+  /* === TOAST === */
+  .toast {
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%) translateY(80px);
+    background: rgba(13,51,32,0.95);
+    border: 1px solid var(--green-bright);
+    border-radius: 12px;
+    padding: 12px 24px;
+    color: var(--green-light);
+    font-weight: 600;
+    font-size: 0.9rem;
+    z-index: 999;
+    transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    backdrop-filter: blur(20px);
+    box-shadow: 0 8px 30px rgba(0,0,0,0.4);
+  }
+
+  .toast.show { transform: translateX(-50%) translateY(0); }
+
+  /* === MODAL === */
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.7);
+    backdrop-filter: blur(8px);
+    z-index: 200;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+
+  .modal-overlay.open { display: flex; }
+
+  .modal {
+    background: var(--green-deep);
+    border: 1px solid var(--card-border);
+    border-radius: var(--radius-lg);
+    padding: 32px;
+    max-width: 560px;
+    width: 100%;
+    animation: fadeUp 0.4s ease;
+    box-shadow: 0 40px 80px rgba(0,0,0,0.5);
+  }
+
+  .modal h2 {
+    font-size: 1.4rem;
+    font-weight: 800;
+    color: var(--green-light);
+    margin-bottom: 8px;
+  }
+
+  .modal p {
+    color: var(--text-muted);
+    margin-bottom: 24px;
+    font-size: 0.9rem;
+    line-height: 1.7;
+  }
+
+  /* === EMPTY STATE === */
+  .empty-state {
+    text-align: center;
+    padding: 50px 20px;
+    color: var(--text-muted);
+  }
+
+  .empty-icon-large { font-size: 3.5rem; margin-bottom: 12px; }
+
+  /* === FOOTER === */
+  footer {
+    position: relative;
+    z-index: 2;
+    text-align: center;
+    padding: 30px;
+    color: rgba(134,239,172,0.3);
+    font-size: 0.8rem;
+    border-top: 1px solid var(--card-border);
+    margin-top: 60px;
+  }
+
+  /* Color tags for notes */
+  .note-color-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    display: inline-block;
+    margin-left: 6px;
+  }
+
+  /* Volume slider */
+  .volume-control {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 16px;
+    margin-top: 4px;
+  }
+
+  input[type=range] {
+    -webkit-appearance: none;
+    flex: 1;
+    height: 4px;
+    background: rgba(74,222,128,0.2);
+    border-radius: 4px;
+    outline: none;
+  }
+
+  input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: var(--green-bright);
+    cursor: pointer;
+    box-shadow: 0 0 8px rgba(34,197,94,0.5);
+  }
+</style>
+</head>
+<body>
+
+<!-- Particles -->
+<div class="particles" id="particles"></div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<!-- Header -->
+<header>
+  <div class="container">
+    <div class="header-inner">
+      <div class="logo">
+        <div class="logo-icon">📚</div>
+        <span>StudyHub</span>
+      </div>
+      <nav>
+        <button class="nav-btn active" onclick="scrollToTabs()">الرئيسية</button>
+        <button class="nav-btn" onclick="switchTab('quiz')">اختبر نفسك</button>
+        <button class="nav-btn" onclick="switchTab('pomodoro')">بومودورو</button>
+        <button class="nav-btn" onclick="switchTab('notes')">ملاحظاتي</button>
+      </nav>
+    </div>
+  </div>
+</header>
+
+<!-- Hero -->
+<div class="container">
+  <div class="hero">
+    <div class="hero-badge">✨ منصة الدراسة الذكية</div>
+    <h1>تعلّم بذكاء، <span class="highlight">انجح بثقة</span></h1>
+    <p>ضع أسئلتك وأجوبتك واختبر نفسك، مع موسيقى، تركيز، وملاحظات — كل شيء في مكان واحد</p>
+  </div>
+
+  <!-- Tabs -->
+  <div class="tabs" id="main-tabs">
+    <button class="tab active" onclick="switchTab('import')">📥 استيراد الأسئلة</button>
+    <button class="tab" onclick="switchTab('quiz')">🧠 اختبر نفسك</button>
+    <button class="tab" onclick="switchTab('flashcards')">🃏 بطاقات المراجعة</button>
+    <button class="tab" onclick="switchTab('pomodoro')">⏱ بومودورو</button>
+    <button class="tab" onclick="switchTab('music')">🎵 موسيقى</button>
+    <button class="tab" onclick="switchTab('notes')">📝 ملاحظات</button>
+  </div>
+
+  <!-- IMPORT PANEL -->
+  <div class="panel active" id="panel-import">
+    <div class="qa-grid">
+      <div class="card">
+        <div class="card-title">📄 الصق النص هنا</div>
+        <textarea class="input-area" id="rawText" placeholder="الصق هنا النص من أسئلة وأجوبة الذكاء الاصطناعي...
+
+مثال:
+س: ما هو الضوء؟
+ج: الضوء هو شكل من أشكال الطاقة.
+
+أو:
+1- ما هو الضوء؟
+الضوء هو شكل من أشكال الطاقة."></textarea>
+        <button class="btn btn-primary" onclick="parseQA()">🔍 تحليل النص واستخراج الأسئلة</button>
+      </div>
+      <div class="card">
+        <div class="card-title" style="justify-content:space-between">
+          <span>📋 الأسئلة المستخرجة <span id="qa-count" style="font-size:0.75rem;background:rgba(34,197,94,0.2);padding:2px 10px;border-radius:50px;">0</span></span>
+          <button class="btn btn-outline btn-sm" onclick="clearAll()" style="font-size:0.75rem">🗑 مسح الكل</button>
+        </div>
+        <div class="qa-list" id="qa-preview">
+          <div class="empty-state">
+            <div class="empty-icon-large">🤖</div>
+            <div>الصق نصاً من الذكاء الاصطناعي وسيتم استخراج الأسئلة تلقائياً</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- QUIZ PANEL -->
+  <div class="panel" id="panel-quiz">
+    <div id="quiz-empty" class="quiz-empty">
+      <div class="empty-icon">📭</div>
+      <p style="font-size:1.1rem;font-weight:600;margin-bottom:8px">لا توجد أسئلة بعد</p>
+      <p style="color:rgba(134,239,172,0.5)">ابدأ باستيراد الأسئلة من تبويب "استيراد الأسئلة"</p>
+      <button class="btn btn-primary" style="margin-top:20px;max-width:200px" onclick="switchTab('import')">→ استيراد الأسئلة</button>
+    </div>
+    <div id="quiz-content" style="display:none">
+      <div class="card quiz-card">
+        <div class="quiz-progress" id="quiz-progress"></div>
+        <div class="question-number" id="q-number"></div>
+        <div class="question-text" id="q-text"></div>
+        <div class="answer-reveal" id="a-reveal"></div>
+        <div class="quiz-buttons" id="quiz-btns">
+          <button class="btn btn-outline" onclick="showAnswer()">👁 اظهر الجواب</button>
+        </div>
+      </div>
+    </div>
+    <div id="quiz-result" style="display:none">
+      <div class="card quiz-result">
+        <div class="stars" id="result-stars"></div>
+        <div class="result-score" id="result-score"></div>
+        <div class="result-label" id="result-label"></div>
+        <button class="btn btn-primary" style="max-width:240px;margin:0 auto" onclick="restartQuiz()">🔄 إعادة الاختبار</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- FLASHCARDS PANEL -->
+  <div class="panel" id="panel-flashcards">
+    <div style="max-width:600px;margin:0 auto">
+      <div id="fc-empty" class="empty-state">
+        <div class="empty-icon-large">🃏</div>
+        <p>استورد أسئلة أولاً لاستخدام البطاقات</p>
+      </div>
+      <div id="fc-content" style="display:none;text-align:center">
+        <div style="margin-bottom:16px;color:var(--text-muted);font-size:0.9rem" id="fc-counter"></div>
+        <div class="card" id="fc-card" onclick="flipCard()" style="cursor:pointer;min-height:220px;display:flex;align-items:center;justify-content:center;flex-direction:column;transition:all 0.3s;user-select:none">
+          <div style="font-size:0.8rem;color:var(--text-muted);margin-bottom:8px" id="fc-side-label">❓ السؤال</div>
+          <div style="font-size:1.2rem;font-weight:700;line-height:1.6" id="fc-text"></div>
+          <div style="font-size:0.75rem;color:rgba(134,239,172,0.4);margin-top:16px">انقر للكشف عن الجواب</div>
+        </div>
+        <div style="display:flex;gap:12px;justify-content:center;margin-top:20px;flex-wrap:wrap">
+          <button class="btn btn-outline" onclick="fcPrev()">→ السابق</button>
+          <button class="btn btn-primary" style="max-width:150px" onclick="fcNext()">← التالي</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- POMODORO PANEL -->
+  <div class="panel" id="panel-pomodoro">
+    <div class="pomodoro-layout">
+      <div class="card">
+        <div class="card-title">⏱ مؤقت بومودورو</div>
+        <div class="timer-display">
+          <div class="timer-modes">
+            <button class="mode-pill active" onclick="setMode('focus',25)" id="mode-focus">🎯 تركيز</button>
+            <button class="mode-pill" onclick="setMode('short',5)" id="mode-short">☕ استراحة قصيرة</button>
+            <button class="mode-pill" onclick="setMode('long',15)" id="mode-long">🌿 استراحة طويلة</button>
+          </div>
+          <div class="timer-ring">
+            <svg class="timer-svg" viewBox="0 0 200 200">
+              <defs>
+                <linearGradient id="timerGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" style="stop-color:#22c55e"/>
+                  <stop offset="100%" style="stop-color:#fbbf24"/>
+                </linearGradient>
+              </defs>
+              <circle class="timer-track" cx="100" cy="100" r="90"/>
+              <circle class="timer-fill" cx="100" cy="100" r="90" id="timer-ring"/>
+            </svg>
+            <div class="timer-text">
+              <div class="timer-time" id="timer-display">25:00</div>
+              <div class="timer-mode-label" id="timer-mode-label">وقت التركيز</div>
+            </div>
+          </div>
+          <div class="timer-controls">
+            <button class="btn btn-primary" style="max-width:140px" onclick="toggleTimer()" id="timer-btn">▶ ابدأ</button>
+            <button class="btn btn-outline btn-sm" onclick="resetTimer()">↺ إعادة</button>
+          </div>
+        </div>
+        <div class="pomodoro-stats">
+          <div class="stat-box">
+            <div class="val" id="stat-sessions">0</div>
+            <div class="lbl">جلسات مكتملة</div>
+          </div>
+          <div class="stat-box">
+            <div class="val" id="stat-minutes">0</div>
+            <div class="lbl">دقائق تركيز</div>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">🎵 موسيقى التركيز</div>
+        <div class="music-section" id="music-list"></div>
+        <div class="volume-control">
+          <span style="font-size:1rem">🔉</span>
+          <input type="range" min="0" max="100" value="50" id="volume-slider" oninput="setVolume(this.value)">
+          <span style="font-size:1rem">🔊</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MUSIC PANEL -->
+  <div class="panel" id="panel-music">
+    <div class="card">
+      <div class="card-title">🎵 مكتبة الموسيقى</div>
+      <div class="music-section" id="music-list-2"></div>
+      <div class="volume-control" style="max-width:400px">
+        <span>🔉</span>
+        <input type="range" min="0" max="100" value="50" id="volume-slider-2" oninput="setVolume(this.value)">
+        <span>🔊</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- NOTES PANEL -->
+  <div class="panel" id="panel-notes">
+    <div class="card" style="margin-bottom:24px">
+      <div class="card-title">➕ إضافة ملاحظة</div>
+      <div class="note-form">
+        <input type="text" class="input-field" id="note-title-input" placeholder="عنوان الملاحظة">
+        <input type="text" class="input-field" id="note-body-input" placeholder="محتوى الملاحظة...">
+        <button class="btn btn-primary" style="white-space:nowrap" onclick="addNote()">+ إضافة</button>
+      </div>
+    </div>
+    <div class="notes-grid" id="notes-container">
+      <div class="empty-state" id="notes-empty" style="grid-column:1/-1">
+        <div class="empty-icon-large">📝</div>
+        <p>لا توجد ملاحظات بعد. أضف أول ملاحظة!</p>
+      </div>
+    </div>
+  </div>
+
+</div><!-- end container -->
+
+<footer>
+  <div>🌿 StudyHub — منصة الدراسة الذكية &nbsp;|&nbsp; صُنعت بـ ❤️ للطلاب</div>
+</footer>
+
+<script>
+// ============================================================
+// PARTICLES
+// ============================================================
+(function() {
+  const container = document.getElementById('particles');
+  for (let i = 0; i < 18; i++) {
+    const p = document.createElement('div');
+    p.className = 'particle';
+    const size = Math.random() * 4 + 1;
+    p.style.cssText = `
+      width:${size}px; height:${size}px;
+      left:${Math.random()*100}%;
+      animation-duration:${Math.random()*15+10}s;
+      animation-delay:${Math.random()*10}s;
+      opacity:${Math.random()*0.4+0.1};
+    `;
+    container.appendChild(p);
+  }
+})();
+
+// ============================================================
+// TOAST
+// ============================================================
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2600);
+}
+
+// ============================================================
+// TABS
+// ============================================================
+function scrollToTabs() {
+  document.getElementById('main-tabs').scrollIntoView({ behavior: 'smooth' });
+}
+
+function switchTab(name) {
+  document.querySelectorAll('.tab').forEach((t, i) => {
+    const panels = ['import','quiz','flashcards','pomodoro','music','notes'];
+    t.classList.toggle('active', panels[i] === name);
+  });
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.getElementById('panel-' + name).classList.add('active');
+  if (name === 'quiz') initQuiz();
+  if (name === 'flashcards') initFlashcards();
+  if (name === 'music') renderMusicList('music-list-2');
+  // update nav btns
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+}
+
+// ============================================================
+// Q&A DATA
+// ============================================================
+let qaData = [];
+
+function parseQA() {
+  const text = document.getElementById('rawText').value.trim();
+  if (!text) { showToast('⚠️ الرجاء لصق نص أولاً'); return; }
+
+  const pairs = [];
+  const lines = text.split('\n').map(l => l.trim()).filter(Boolean);
+
+  // Pattern 1: س:... ج:...
+  let i = 0;
+  while (i < lines.length) {
+    const qMatch = lines[i].match(/^(?:س|Q|سؤال|question)\s*[:.\-\d]*\s*(.+)/i);
+    if (qMatch) {
+      let q = qMatch[1].trim();
+      let a = '';
+      i++;
+      while (i < lines.length) {
+        const aMatch = lines[i].match(/^(?:ج|A|جواب|الجواب|answer)\s*[:.\-\d]*\s*(.*)/i);
+        if (aMatch) {
+          a = aMatch[1].trim();
+          // collect multi-line answer
+          i++;
+          while (i < lines.length && !lines[i].match(/^(?:س|Q|سؤال|question)\s*[:.\-\d]/i)) {
+            if (!lines[i].match(/^(?:ج|A|جواب|الجواب|answer)\s*[:.\-\d]/i)) {
+              a += ' ' + lines[i];
+            }
+            i++;
+          }
+          break;
+        } else { i++; break; }
+      }
+      if (q && a) pairs.push({ q, a });
+    } else {
+      i++;
+    }
+  }
+
+  // Pattern 2: numbered "1- question\nanswer"
+  if (pairs.length === 0) {
+    i = 0;
+    while (i < lines.length) {
+      const numMatch = lines[i].match(/^(\d+)\s*[\.\-\)]\s*(.+)/);
+      if (numMatch && i + 1 < lines.length) {
+        const nextIsNotNum = !lines[i+1].match(/^\d+\s*[\.\-\)]/);
+        if (nextIsNotNum) {
+          pairs.push({ q: numMatch[2].trim(), a: lines[i+1].trim() });
+          i += 2; continue;
+        }
+      }
+      i++;
+    }
+  }
+
+  // Pattern 3: blank-line separated Q&A
+  if (pairs.length === 0) {
+    const blocks = text.split(/\n\s*\n/);
+    blocks.forEach(block => {
+      const blines = block.split('\n').map(l => l.trim()).filter(Boolean);
+      if (blines.length >= 2) {
+        pairs.push({ q: blines[0], a: blines.slice(1).join(' ') });
+      }
+    });
+  }
+
+  if (pairs.length === 0) {
+    showToast('❌ لم يتم التعرف على أسئلة. تأكد من التنسيق');
+    return;
+  }
+
+  qaData = pairs;
+  renderPreview();
+  showToast(`✅ تم استخراج ${pairs.length} سؤال وجواب!`);
+}
+
+function renderPreview() {
+  const container = document.getElementById('qa-preview');
+  document.getElementById('qa-count').textContent = qaData.length;
+
+  if (!qaData.length) {
+    container.innerHTML = `<div class="empty-state"><div class="empty-icon-large">🤖</div><div>الصق نصاً من الذكاء الاصطناعي</div></div>`;
+    return;
+  }
+
+  container.innerHTML = qaData.map((item, idx) => `
+    <div class="qa-item" onclick="toggleQA(${idx})" id="qa-item-${idx}">
+      <div class="q-text">❓ ${item.q}</div>
+      <div class="reveal-hint">انقر لرؤية الجواب</div>
+      <div class="a-text">✅ ${item.a}</div>
+    </div>
+  `).join('');
+}
+
+function toggleQA(idx) {
+  document.getElementById('qa-item-' + idx).classList.toggle('revealed');
+}
+
+function clearAll() {
+  qaData = [];
+  document.getElementById('rawText').value = '';
+  renderPreview();
+  showToast('🗑 تم مسح جميع الأسئلة');
+}
+
+// ============================================================
+// QUIZ
+// ============================================================
+let quizState = { questions: [], current: 0, score: 0, wrong: 0, answered: false, dots: [] };
+
+function initQuiz() {
+  if (!qaData.length) {
+    document.getElementById('quiz-empty').style.display = 'block';
+    document.getElementById('quiz-content').style.display = 'none';
+    document.getElementById('quiz-result').style.display = 'none';
+    return;
+  }
+  document.getElementById('quiz-empty').style.display = 'none';
+  quizState.questions = [...qaData].sort(() => Math.random() - 0.5);
+  quizState.current = 0; quizState.score = 0; quizState.wrong = 0;
+  quizState.dots = quizState.questions.map(() => 'pending');
+  document.getElementById('quiz-result').style.display = 'none';
+  document.getElementById('quiz-content').style.display = 'block';
+  renderQuestion();
+}
+
+function renderQuestion() {
+  const q = quizState.questions[quizState.current];
+  document.getElementById('q-number').textContent = `السؤال ${quizState.current + 1} من ${quizState.questions.length}`;
+  document.getElementById('q-text').textContent = q.q;
+  document.getElementById('a-reveal').style.display = 'none';
+  document.getElementById('a-reveal').textContent = '';
+  document.getElementById('quiz-btns').innerHTML = `<button class="btn btn-outline" onclick="showAnswer()">👁 اظهر الجواب</button>`;
+  quizState.answered = false;
+  renderDots();
+}
+
+function renderDots() {
+  const prog = document.getElementById('quiz-progress');
+  prog.innerHTML = quizState.dots.map((d, i) => {
+    let cls = 'progress-dot';
+    if (d === 'correct') cls += ' done';
+    else if (d === 'wrong') cls += ' wrong';
+    else if (i === quizState.current) cls += ' current';
+    return `<div class="${cls}"></div>`;
+  }).join('');
+}
+
+function showAnswer() {
+  const q = quizState.questions[quizState.current];
+  const reveal = document.getElementById('a-reveal');
+  reveal.textContent = '✅ ' + q.a;
+  reveal.style.display = 'block';
+  document.getElementById('quiz-btns').innerHTML = `
+    <button class="btn-correct" onclick="markAnswer(true)">✓ أجبت صح</button>
+    <button class="btn-wrong" onclick="markAnswer(false)">✗ أجبت غلط</button>
+  `;
+}
+
+function markAnswer(correct) {
+  if (correct) { quizState.score++; quizState.dots[quizState.current] = 'correct'; }
+  else { quizState.wrong++; quizState.dots[quizState.current] = 'wrong'; }
+  quizState.current++;
+  if (quizState.current >= quizState.questions.length) { showResult(); return; }
+  renderQuestion();
+}
+
+function showResult() {
+  document.getElementById('quiz-content').style.display = 'none';
+  document.getElementById('quiz-result').style.display = 'block';
+  const pct = Math.round((quizState.score / quizState.questions.length) * 100);
+  document.getElementById('result-score').textContent = pct + '%';
+  const stars = pct >= 90 ? '⭐⭐⭐' : pct >= 70 ? '⭐⭐' : '⭐';
+  document.getElementById('result-stars').textContent = stars;
+  const labels = pct >= 90 ? 'ممتاز! أنت نجم 🌟' : pct >= 70 ? 'جيد! استمر في المراجعة 💪' : 'حاول مرة أخرى 📖';
+  document.getElementById('result-label').textContent = `${quizState.score} من ${quizState.questions.length} — ${labels}`;
+}
+
+function restartQuiz() { initQuiz(); }
+
+// ============================================================
+// FLASHCARDS
+// ============================================================
+let fcState = { idx: 0, flipped: false };
+
+function initFlashcards() {
+  if (!qaData.length) {
+    document.getElementById('fc-empty').style.display = 'block';
+    document.getElementById('fc-content').style.display = 'none';
+    return;
+  }
+  document.getElementById('fc-empty').style.display = 'none';
+  document.getElementById('fc-content').style.display = 'block';
+  fcState.idx = 0; fcState.flipped = false;
+  renderFC();
+}
+
+function renderFC() {
+  const item = qaData[fcState.idx];
+  document.getElementById('fc-counter').textContent = `${fcState.idx + 1} / ${qaData.length}`;
+  if (fcState.flipped) {
+    document.getElementById('fc-side-label').textContent = '✅ الجواب';
+    document.getElementById('fc-text').textContent = item.a;
+    document.getElementById('fc-card').style.background = 'rgba(34,197,94,0.08)';
+    document.getElementById('fc-card').style.borderColor = 'rgba(74,222,128,0.4)';
+  } else {
+    document.getElementById('fc-side-label').textContent = '❓ السؤال';
+    document.getElementById('fc-text').textContent = item.q;
+    document.getElementById('fc-card').style.background = 'var(--card-bg)';
+    document.getElementById('fc-card').style.borderColor = 'var(--card-border)';
+  }
+}
+
+function flipCard() {
+  fcState.flipped = !fcState.flipped;
+  renderFC();
+}
+
+function fcNext() {
+  fcState.idx = (fcState.idx + 1) % qaData.length;
+  fcState.flipped = false;
+  renderFC();
+}
+
+function fcPrev() {
+  fcState.idx = (fcState.idx - 1 + qaData.length) % qaData.length;
+  fcState.flipped = false;
+  renderFC();
+}
+
+// ============================================================
+// POMODORO
+// ============================================================
+let pState = {
+  total: 25 * 60, remaining: 25 * 60, running: false,
+  interval: null, mode: 'focus', sessions: 0, totalMinutes: 0,
+  sessionStart: null
+};
+
+const CIRCUMFERENCE = 2 * Math.PI * 90; // ≈565
+
+function setMode(mode, mins) {
+  clearInterval(pState.interval);
+  pState.running = false;
+  pState.mode = mode;
+  pState.total = mins * 60;
+  pState.remaining = mins * 60;
+  document.getElementById('timer-btn').textContent = '▶ ابدأ';
+  const labels = { focus: 'وقت التركيز', short: 'استراحة قصيرة', long: 'استراحة طويلة' };
+  document.getElementById('timer-mode-label').textContent = labels[mode];
+  updateTimerDisplay();
+  document.querySelectorAll('.mode-pill').forEach(p => p.classList.remove('active'));
+  document.getElementById('mode-' + mode).classList.add('active');
+}
+
+function updateTimerDisplay() {
+  const m = String(Math.floor(pState.remaining / 60)).padStart(2, '0');
+  const s = String(pState.remaining % 60).padStart(2, '0');
+  document.getElementById('timer-display').textContent = `${m}:${s}`;
+  const pct = pState.remaining / pState.total;
+  document.getElementById('timer-ring').style.strokeDasharray = CIRCUMFERENCE;
+  document.getElementById('timer-ring').style.strokeDashoffset = CIRCUMFERENCE * (1 - pct);
+}
+
+function toggleTimer() {
+  if (pState.running) {
+    clearInterval(pState.interval);
+    pState.running = false;
+    document.getElementById('timer-btn').textContent = '▶ متابعة';
+  } else {
+    pState.running = true;
+    pState.sessionStart = Date.now();
+    document.getElementById('timer-btn').textContent = '⏸ إيقاف';
+    pState.interval = setInterval(() => {
+      pState.remaining--;
+      updateTimerDisplay();
+      if (pState.remaining <= 0) {
+        clearInterval(pState.interval);
+        pState.running = false;
+        document.getElementById('timer-btn').textContent = '▶ ابدأ';
+        if (pState.mode === 'focus') {
+          pState.sessions++;
+          pState.totalMinutes += pState.total / 60;
+          document.getElementById('stat-sessions').textContent = pState.sessions;
+          document.getElementById('stat-minutes').textContent = pState.totalMinutes;
+          showToast('🎉 جلسة مكتملة! حان وقت الاستراحة');
+        } else {
+          showToast('⏰ انتهت الاستراحة! حان وقت التركيز');
+        }
+        pState.remaining = 0;
+      }
+    }, 1000);
+  }
+}
+
+function resetTimer() {
+  clearInterval(pState.interval);
+  pState.running = false;
+  pState.remaining = pState.total;
+  document.getElementById('timer-btn').textContent = '▶ ابدأ';
+  updateTimerDisplay();
+}
+
+updateTimerDisplay();
+
+// ============================================================
+// MUSIC (Web Audio API - Generated Tones)
+// ============================================================
+let audioCtx = null;
+let currentNodes = [];
+let masterGain = null;
+let currentTrack = null;
+
+const TRACKS = [
+  { id: 'rain', name: 'مطر هادئ', icon: '🌧', type: 'ضجيج بيضاء', color: '#3b82f6', fn: 'rain' },
+  { id: 'forest', name: 'غابة صوتية', icon: '🌿', type: 'أصوات طبيعية', color: '#22c55e', fn: 'forest' },
+  { id: 'lofi', name: 'Lo-Fi دراسة', icon: '🎸', type: 'موسيقى هادئة', color: '#a855f7', fn: 'lofi' },
+  { id: 'white', name: 'ضجيج أبيض', icon: '🌊', type: 'تركيز عميق', color: '#06b6d4', fn: 'white' },
+  { id: 'binaural', name: 'نغمات ثنائية', icon: '🧘', type: 'تحفيز الدماغ', color: '#f59e0b', fn: 'binaural' },
+];
+
+function initAudio() {
+  if (!audioCtx) {
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    masterGain = audioCtx.createGain();
+    masterGain.gain.value = 0.5;
+    masterGain.connect(audioCtx.destination);
+  }
+}
+
+function stopAudio() {
+  currentNodes.forEach(n => { try { n.stop(); } catch(e){} });
+  currentNodes = [];
+}
+
+function playRain() {
+  const buf = audioCtx.createBuffer(2, audioCtx.sampleRate * 3, audioCtx.sampleRate);
+  for (let ch = 0; ch < 2; ch++) {
+    const data = buf.getChannelData(ch);
+    for (let i = 0; i < data.length; i++) data[i] = Math.random() * 2 - 1;
+  }
+  const source = audioCtx.createBufferSource();
+  source.buffer = buf; source.loop = true;
+  const filter = audioCtx.createBiquadFilter();
+  filter.type = 'lowpass'; filter.frequency.value = 800;
+  source.connect(filter); filter.connect(masterGain);
+  source.start(); currentNodes.push(source);
+}
+
+function playForest() {
+  for (let i = 0; i < 3; i++) {
+    const osc = audioCtx.createOscillator();
+    const g = audioCtx.createGain();
+    osc.type = 'sine';
+    osc.frequency.value = 200 + i * 80 + Math.random() * 50;
+    g.gain.value = 0.05;
+    osc.connect(g); g.connect(masterGain);
+    osc.start(); currentNodes.push(osc);
+  }
+  playRain();
+}
+
+function playLofi() {
+  const notes = [261, 293, 329, 349, 392];
+  let t = audioCtx.currentTime;
+  const play = () => {
+    if (currentTrack !== 'lofi') return;
+    const osc = audioCtx.createOscillator();
+    const g = audioCtx.createGain();
+    const note = notes[Math.floor(Math.random() * notes.length)];
+    osc.type = 'triangle';
+    osc.frequency.value = note;
+    g.gain.setValueAtTime(0.08, t);
+    g.gain.exponentialRampToValueAtTime(0.001, t + 0.8);
+    osc.connect(g); g.connect(masterGain);
+    osc.start(t); osc.stop(t + 0.9);
+    currentNodes.push(osc);
+    t += 0.5;
+    if (currentTrack === 'lofi') setTimeout(play, 400);
+  };
+  play();
+}
+
+function playWhite() {
+  const buf = audioCtx.createBuffer(1, audioCtx.sampleRate * 2, audioCtx.sampleRate);
+  const data = buf.getChannelData(0);
+  for (let i = 0; i < data.length; i++) data[i] = Math.random() * 2 - 1;
+  const src = audioCtx.createBufferSource();
+  src.buffer = buf; src.loop = true;
+  src.connect(masterGain); src.start(); currentNodes.push(src);
+}
+
+function playBinaural() {
+  const L = audioCtx.createOscillator();
+  const R = audioCtx.createOscillator();
+  const Lg = audioCtx.createGain(); const Rg = audioCtx.createGain();
+  const merger = audioCtx.createChannelMerger(2);
+  L.frequency.value = 200; R.frequency.value = 210;
+  Lg.gain.value = 0.1; Rg.gain.value = 0.1;
+  L.connect(Lg); Lg.connect(merger, 0, 0);
+  R.connect(Rg); Rg.connect(merger, 0, 1);
+  merger.connect(masterGain);
+  L.start(); R.start();
+  currentNodes.push(L, R);
+}
+
+const trackFns = { rain: playRain, forest: playForest, lofi: playLofi, white: playWhite, binaural: playBinaural };
+
+function toggleTrack(id) {
+  initAudio();
+  if (audioCtx.state === 'suspended') audioCtx.resume();
+
+  if (currentTrack === id) {
+    stopAudio();
+    currentTrack = null;
+    renderMusicList('music-list');
+    renderMusicList('music-list-2');
+    return;
+  }
+
+  stopAudio();
+  currentTrack = id;
+  trackFns[TRACKS.find(t => t.id === id).fn]();
+  renderMusicList('music-list');
+  renderMusicList('music-list-2');
+}
+
+function setVolume(val) {
+  if (masterGain) masterGain.gain.value = val / 100;
+  document.getElementById('volume-slider').value = val;
+  document.getElementById('volume-slider-2').value = val;
+}
+
+function renderMusicList(containerId) {
+  const container = document.getElementById(containerId);
+  if (!container) return;
+  container.innerHTML = TRACKS.map(t => `
+    <div class="music-item ${currentTrack === t.id ? 'playing' : ''}" onclick="toggleTrack('${t.id}')">
+      <div class="music-icon" style="background:linear-gradient(135deg,${t.color}88,${t.color}44)">${t.icon}</div>
+      <div class="music-info">
+        <div class="music-name">${t.name}</div>
+        <div class="music-type">${t.type}</div>
+      </div>
+      ${currentTrack === t.id
+        ? `<div class="equalizer">${'<div class="eq-bar"></div>'.repeat(4)}</div>`
+        : `<div class="music-toggle">▶</div>`
+      }
+    </div>
+  `).join('');
+}
+
+renderMusicList('music-list');
+
+// ============================================================
+// NOTES
+// ============================================================
+let notes = JSON.parse(localStorage.getItem('studyhub_notes') || '[]');
+
+function saveNotes() {
+  localStorage.setItem('studyhub_notes', JSON.stringify(notes));
+}
+
+function addNote() {
+  const title = document.getElementById('note-title-input').value.trim();
+  const body = document.getElementById('note-body-input').value.trim();
+  if (!title && !body) { showToast('⚠️ الرجاء كتابة محتوى الملاحظة'); return; }
+  notes.unshift({
+    id: Date.now(),
+    title: title || 'ملاحظة',
+    body: body || '',
+    date: new Date().toLocaleDateString('ar-IQ')
+  });
+  saveNotes();
+  document.getElementById('note-title-input').value = '';
+  document.getElementById('note-body-input').value = '';
+  renderNotes();
+  showToast('📝 تمت إضافة الملاحظة');
+}
+
+function deleteNote(id) {
+  notes = notes.filter(n => n.id !== id);
+  saveNotes();
+  renderNotes();
+  showToast('🗑 تم حذف الملاحظة');
+}
+
+function renderNotes() {
+  const container = document.getElementById('notes-container');
+  const empty = document.getElementById('notes-empty');
+  if (!notes.length) {
+    empty.style.display = 'block';
+    container.innerHTML = '';
+    container.appendChild(empty);
+    return;
+  }
+  empty.style.display = 'none';
+  container.innerHTML = notes.map(n => `
+    <div class="note-card">
+      <button class="note-delete" onclick="deleteNote(${n.id})">✕</button>
+      <div class="note-title">${escHtml(n.title)}</div>
+      <div class="note-body">${escHtml(n.body)}</div>
+      <div class="note-date">📅 ${n.date}</div>
+    </div>
+  `).join('');
+}
+
+function escHtml(s) {
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+renderNotes();
+
+// Keyboard shortcut: Enter to add note when in note inputs
+document.getElementById('note-body-input').addEventListener('keydown', e => {
+  if (e.key === 'Enter') addNote();
+});
+
+</script>
+</body>
+</html>
